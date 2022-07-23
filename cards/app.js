@@ -11,25 +11,10 @@ const capitalize = (str) => {
 };
 
 // Step 1
-axios
-  .get(`${cardsURL}new/draw/`)
-  .then((data) => {
-    //console.log(data);
-    let { suit, value } = data.data.cards[0];
-    console.log(
-      `${capitalize(value.toLowerCase())} of ${capitalize(suit.toLowerCase())}`
-    );
-  })
-  .catch((err) => console.log(err));
-
-// Step 2
-let twoPromises = [];
-for (let i = 0; i < 2; i++) {
-  twoPromises.push(axios.get(`${cardsURL}new/draw/`));
-}
-Promise.all(twoPromises)
-  .then((cardsArr) =>
-    cardsArr.forEach((data) => {
+async function part1() {
+  let res = await axios
+    .get(`${cardsURL}new/draw/`)
+    .then((data) => {
       let { suit, value } = data.data.cards[0];
       console.log(
         `${capitalize(value.toLowerCase())} of ${capitalize(
@@ -37,33 +22,47 @@ Promise.all(twoPromises)
         )}`
       );
     })
-  )
-  .catch((err) => console.log(err));
+    .catch((err) => console.log(err));
+}
+part1();
+
+// Step 2
+async function part2() {
+  let ranNums = await Promise.all([
+    axios.get(`${cardsURL}new/draw/`),
+    axios.get(`${cardsURL}new/draw/`),
+  ]);
+  for (i = 0; i < 2; i++) {
+    let { suit, value } = ranNums[i].data.cards[0];
+    console.log(
+      `${capitalize(value.toLowerCase())} of ${capitalize(suit.toLowerCase())}`
+    );
+  }
+}
+part2();
 
 // Step 3
-let deckId = null;
 let button = document.getElementById('give-me-button');
 
-axios
-  .get(`${cardsURL}new/shuffle/`)
-  .then((data) => {
-    deckId = data.data.deck_id;
-    button.style.display = '';
-  })
-  .catch((err) => console.log(err));
+async function setup() {
+  let deckData = await axios.get(`${cardsURL}new/shuffle/`);
+  deckId = deckData.data.deck_id;
+  button.style.display = '';
 
-button.onclick = function () {
-  axios
-    .get(`${cardsURL}${deckId}/draw/`)
-    .then((data) => {
-      let cardSrc = data.data.cards[0].image;
-      let angle = Math.random() * 90 - 45;
-      let randomX = Math.random() * 40 - 20;
-      let randomY = Math.random() * 40 - 20;
-      document.getElementById(
-        'cards'
-      ).innerHTML = `<img src="${cardSrc}" style="transform: translate(${randomX}px, ${randomY}px) rotate(${angle}deg); margin-top: 50px;" />`;
-      button.style.display = 'none';
-    })
-    .catch((err) => console.log(err));
-};
+  button.onclick = async function () {
+    let cardData = await axios
+      .get(`${cardsURL}${deckId}/draw/`)
+      .then((data) => {
+        let cardSrc = data.data.cards[0].image;
+        let angle = Math.random() * 90 - 45;
+        let randomX = Math.random() * 40 - 20;
+        let randomY = Math.random() * 40 - 20;
+        document.getElementById(
+          'cards'
+        ).innerHTML = `<img src="${cardSrc}" style="transform: translate(${randomX}px, ${randomY}px) rotate(${angle}deg); margin-top: 50px;" />`;
+        button.style.display = 'none';
+      })
+      .catch((err) => console.log(err));
+  };
+}
+setup();
