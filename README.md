@@ -1,4 +1,4 @@
-# 31.3 Async & Await
+# 31.3 | Async & Await
 
 ## Part 1: Number Facts
 1. Make a request to the Numbers API ([http://numbersapi.com/](http://numbersapi.com/)) to get a
